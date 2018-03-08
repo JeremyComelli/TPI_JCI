@@ -1,4 +1,4 @@
-import numpy
+import numpy as np
 
 
 class NeuralNetwork:
@@ -10,11 +10,27 @@ class NeuralNetwork:
         self.hidden_layer_size = hidden_layer
         self.output_layer_size = output_layer
 
-        self.first_layer = ()
-        for i in range(0, self.input_layer):
+        # matrix of n row, and 1 column, will be used for dot product
+        self.weights_ih = np.random.rand(self.input_layer_size * 2 - 1, 1)
 
-            neuron = Perceptron(numpy.matrix('1 1 1 1'), 0)
-            self.first_layer.append(    )
+        ''' self.weights_ih = np.random.rand(self.input_layer_size, self.hidden_layer_size) * 2 - 1
+        self.weights_ho = np.random.rand(self.input_layer_size, self.hidden_layer_size) * 2 - 1
+
+        # Generating random biases
+        self.bias_h = np.random.rand(1, self.hidden_layer_size) * 2 - 1
+        self.bias_o = np.random.rand(1, self.hidden_layer_size) * 2 - 1'''
+
+    # sigmoid function, taken from https://iamtrask.github.io/2015/07/12/basic-python-network/
+    def sigmoid(self, input_number, deriv=False):
+        if deriv:
+            return input_number*(1-input_number)
+        return 1/(1+np.exp(-input_number))
+
+    def compute(self, input_matrix, weights_matrix):
+        print(input_matrix)
+        print(weights_matrix)
+        return self.sigmoid(np.vdot(input_matrix, weights_matrix))
+
 
 
 class Perceptron:
@@ -29,7 +45,7 @@ class Perceptron:
 
         # If layer is 0, it means it's the input layer; therefore, there is one weight, which is 1
         if self.layer == 0:
-            self.weights = numpy.matrix('1')
+            self.weights = np.matrix('1')
         else:
             self.weights = input_matrix.item
         print(input_matrix.size)
