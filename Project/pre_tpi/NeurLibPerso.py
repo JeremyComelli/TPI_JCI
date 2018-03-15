@@ -1,6 +1,8 @@
 import numpy as np
+from pandas import *
 
 
+# pandas is mainly used to pretty-print matrices
 class NeuralNetwork:
     # stuff of dreams
     def __init__(self, input_layer, hidden_layer, output_layer):
@@ -10,15 +12,27 @@ class NeuralNetwork:
         self.hidden_layer_size = hidden_layer
         self.output_layer_size = output_layer
 
-        # matrix of n row, and 1 column, will be used for dot product
-        self.weights_ih = np.random.rand(self.input_layer_size * 2 - 1, 1)
+        # matrix of n rows, and 1 column, will be used for dot product
 
-        ''' self.weights_ih = np.random.rand(self.input_layer_size, self.hidden_layer_size) * 2 - 1
-        self.weights_ho = np.random.rand(self.input_layer_size, self.hidden_layer_size) * 2 - 1
+        # Generating hidden layer weights
+        # Generates a matrix where rows = nb of neurons, and columns = nb of input + 1 columns of bias weights
+        self.weights_ih = np.matrix(np.random.rand(self.hidden_layer_size, self.input_layer_size) * 2 - 1)
 
-        # Generating random biases
-        self.bias_h = np.random.rand(1, self.hidden_layer_size) * 2 - 1
-        self.bias_o = np.random.rand(1, self.hidden_layer_size) * 2 - 1'''
+        # Generating hidden layer biases
+        self.biases_hidden = np.matrix((np.random.rand(self.input_layer_size, 1)*10).round(0))
+
+        # Generating input values
+        self.input_values = np.matrix(np.random.rand(self.input_layer_size, 1).round(0))
+
+        np.set_printoptions(precision=3)
+        print("\n\nInput values")
+        print(DataFrame(self.input_values).round(3))
+
+        print("\n\nWeights")
+        print(DataFrame(self.weights_ih).round(3))
+
+        print("\n\nBiases")
+        print(DataFrame(self.biases_hidden).round(3))
 
     # sigmoid function, taken from https://iamtrask.github.io/2015/07/12/basic-python-network/
     def sigmoid(self, input_number, deriv=False):
@@ -27,44 +41,7 @@ class NeuralNetwork:
         return 1/(1+np.exp(-input_number))
 
     def compute(self, input_matrix, weights_matrix):
-        print(input_matrix)
-        print(weights_matrix)
-        return self.sigmoid(np.vdot(input_matrix, weights_matrix))
+        return self.sigmoid(np.dot(weights_matrix, input_matrix)+self.biases_hidden)
 
-
-
-class Perceptron:
-
-    def __init__(self, input_matrix, layer_id):
-        # Perceptron receives a matrix as input. Each line represents a weight,
-        # and the last row is the bias
-
-        # Layer ID: 0 -> Input | 1 -> Hidden | 2-> Output
-        self.layer = layer_id
-        self.bias = input_matrix.item(input_matrix.size-1)
-
-        # If layer is 0, it means it's the input layer; therefore, there is one weight, which is 1
-        if self.layer == 0:
-            self.weights = np.matrix('1')
-        else:
-            self.weights = input_matrix.item
-        print(input_matrix.size)
-
-        for i in range(0, input_matrix.size-1):
-            print(i)
-            self.weights.append(input_matrix.item(0, i))
-
-        print("bias =" + str(self.bias))
-        print("Weights =" + str(self.weights))
-
-    def compute(self):
-        # Here lies the real part of the Algorithm.
-        # The neuron takes current input, weights and bias, a sigmoid activation function,
-        # shakes everything together and returns an output smoothie
-
-        # Neuron algorithm: Sig(W1 * I1 + Bias)
-        print("test")
-
-        return 1
 
 
