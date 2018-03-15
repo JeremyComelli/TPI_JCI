@@ -16,7 +16,7 @@ np.set_printoptions(precision=3)
 #  Suppresses scientific notation for small values, because I'm lazy and don't want to think
 np.set_printoptions(suppress=True)
 
-nn = NeurLibPerso.NeuralNetwork(3, 3, 1)
+nn = NeurLibPerso.NeuralNetwork(10, 10, 1)
 
 print("\n\nOutput from first layer:")
 print(DataFrame(nn.compute(nn.input_values, nn.weights_ih)))
