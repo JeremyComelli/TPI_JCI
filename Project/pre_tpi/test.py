@@ -22,8 +22,6 @@ else:
     labels_path = sys.argv[1] + "\\labels\\labels.idx1-ubyte"
     mode = sys.argv[2]
 
-
-
 print("\nData path: " + data_path)
 print("\nLabels path: " + labels_path + "\n")
 
