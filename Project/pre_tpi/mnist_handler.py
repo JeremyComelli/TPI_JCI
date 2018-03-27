@@ -1,4 +1,6 @@
 import sys
+import struct
+
 
 class MNIST:
     def __init__(self, training, path):
@@ -13,46 +15,51 @@ class MNIST:
         print("Data Path: " + self.labels_path)
         print("Labels Path: " + self.data_path + "\n\n")
 
-        self.data = open(self.data_path, "rb")
-        self.labels = open(self.labels_path, "rb")
+        self.data = list()
+        self.read_file()
 
-    def print_data(self):
-        i = 0
-        y = 0
-        line = ""
-        counter = 0
+    def read_file(self, limit=0):
+        # TODO: récupérer le nombre d'images dans les 16 premiers bytes, et mettre une limite
+        print("Processing files, please wait...")
+        # Open files
+        data_file = open(self.data_path, "rb")
+        labels_file = open(self.labels_path, "rb")
 
         # Ignoring the first 16 bytes of the data file, which is metadata
-        self.data.seek(16)
+        data_file.seek(16)
 
-        # Ignoring the first 8 bytes of the labels file, which is metadata
-        self.labels.seek(8)
+        labels_file.seek(8)
 
-        # Looping trough the bytes of data, to print an output
-        for image_byte in self.data.read():
-            if i < 27:
-                # The spaces are required for output formatting
-                first_space = " "
-                if image_byte < 10:
-                        first_space = "   "
-                elif image_byte < 100:
-                        first_space = "  "
+        # Reading chunks of 784 bytes, each of which represents one image
+        # We then add each entry to a list, which will contain all data and all labels
+        chunk = list()
+        for pixel in data_file.read():
+            chunk.append(pixel)
+            if len(chunk) > 783:
+                label = int.from_bytes(labels_file.read(1), byteorder='big')
+                entry = [label, chunk]
+                self.data.append(entry)
+                chunk = list()
+        id = int(input("ID: "))
+        self.print_image(self.data[id][1])
+        print("Value: " + str(self.data[id][0]))
 
-                line += first_space + str(image_byte)
-                i += 1
-            else:
-                i = 0
+    @staticmethod
+    def print_image(image):
+        line = list()
+        i = 0
+
+        for pixel in image:
+            space = ""
+            if pixel < 10:
+                space = "  "
+            elif pixel < 100:
+                space = " "
+            line.append(space + str(pixel))
+            i += 1
+            if i > 27:
                 print(line)
-                line = ""
-                y += 1
-
-            if y > 27:
-                counter += 1
-                print("\n\nImage " + str(counter) + "\n")
-
-                #this is ugly, but works for some reason
-                for label in self.labels.read(1):
-                    print("Answer: " + str(label))
-                y = 0
+                line = list()
+                i = 0
 
 

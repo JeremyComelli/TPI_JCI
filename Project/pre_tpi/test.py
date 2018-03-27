@@ -17,9 +17,7 @@ if sys.argv[1] is None or sys.argv[2] is None:
     sys.exit("Error, missing argument")
 
 handler = MNIST_Handler.MNIST(True, sys.argv[1])
-
-handler.print_data()
-
+# handler.print_image(handler.images[0])
 
 # print(str(image_byte))
 # np.random.seed(12)
