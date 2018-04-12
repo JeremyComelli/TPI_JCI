@@ -20,7 +20,7 @@ class MNIST:
         self.read_file()
 
         image_id, image = self.get_image(12)
-        print(image_id)
+        print("Image Value: " + str(image_id))
         self.print_image(image)
 
     def read_file(self, limit=0):

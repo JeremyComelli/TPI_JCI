@@ -13,22 +13,23 @@ neuron = NeurLibPerso.Perceptron(np)'''
 
 # Handling args, right now it's kind of unusual, but it works.
 # TODO: find a way to handle args properly
+# TODO: maybe a config file would be simpler for portability?
+# TODO: implement a verbose setting
 if len(sys.argv) < 0:
     sys.exit("Error, missing argument")
 
-handler = MNIST_Handler.MNIST(True, sys.argv[1])
+#handler = MNIST_Handler.MNIST(True, sys.argv[1])
 # handler.print_image(handler.images[0])
 
 # print(str(image_byte))
-# np.random.seed(12)
+np.random.seed(13)
 
-# Setting the print precision to 3, to get simpler readings
-# np.set_printoptions(precision=3)
+layers = 5, 5, 5, 5, 5, 5, 5, 5, 5
 
-#  Suppresses scientific notation for small values, because I'm lazy and don't want to think
-# np.set_printoptions(suppress=True)
+nn = NeurLibPerso.NeuralNetwork(layers, 0)
 
-# nn = NeurLibPerso.NeuralNetwork(10, 10, 1)
+#image_id, image = handler.get_image(28)
 
+nn.compute()
 # print("\n\nOutput from first layer:")
 # print(DataFrame(nn.compute(nn.input_values, nn.weights_ih)))'''
