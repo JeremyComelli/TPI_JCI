@@ -9,7 +9,7 @@ class NeuralNetwork:
     def __init__(self, nb_layers, activation_function):
 
         # Setting the print precision to 3, to get simpler readings
-        np.set_printoptions(precision=3)
+        np.set_printoptions(precision=7)
 
         #  Suppresses scientific notation for small values, improves readability
         # np.set_printoptions(suppress=True)
@@ -26,16 +26,18 @@ class NeuralNetwork:
 
         self.activation_function = activation_function
 
+        print("\nNeural network Initialized Successfully\n")
+
     # Generates random weights between 2 layers. Every value is between -1 and 1
     @staticmethod
     def generate_weights(nb_layers):
         weights = list()
         i = 0
+        np.random.seed(10)
         for layer in nb_layers:
             if i < len(nb_layers) - 1:
-                weights.append(np.random.rand(nb_layers[i + 1], nb_layers[i]))
+                weights.append(np.matrix(np.random.rand(nb_layers[i+1], layer)))
             i += 1
-        print(str(weights) + "\n")
         return weights
 
     # Generates random biases for each neuron (except input and output)
@@ -67,11 +69,15 @@ class NeuralNetwork:
     def compute(self, input_vector=0):
         # if no input is specified, we use dummy values for testing
         if input_vector is 0:
-            print("No input values specified, using dummy-random values")
+            print("\nNo input values specified, using dummy-random values")
             input_vector = np.matrix(np.random.rand(self.layers[self.current_step], 1)*10)
 
-        # Recursive magic happening here
-        self.compute_layer(input_vector)
+            # Recursive magic happening here
+            self.compute_layer(input_vector)
+        else:
+            input_id, raw_input_image = input_vector
+            input_image = np.matrix(raw_input_image)
+            self.compute_layer(input_image)
         return 0
 
     # Recursive function that computes a layer, then calls itself with
@@ -84,7 +90,7 @@ class NeuralNetwork:
         # Recursion happens here, if there is another layer, we need to go deeper
         if self.current_step < len(self.layers) - 1:
             for neuron in range(0, self.layers[self.current_step + 1]):
-                layer_output.append(self.compute_neuron(input_vector, self.weights[self.current_step][neuron, :]))
+                layer_output.append(self.compute_neuron(input_vector, self.weights[self.current_step][:, neuron].transpose()))
 
             self.current_step += 1
             self.compute_layer(np.matrix(layer_output).transpose())
@@ -93,9 +99,17 @@ class NeuralNetwork:
 
     # Here we compute a weighted sum
     def compute_neuron(self, input_matrix, weight_matrix, bias=0):
+        print(str(input_matrix.shape))
+        print(str(weight_matrix.shape))
+        # Prints used to troubleshoot neurons, remove for release
         '''print("\nNeuron input: \n" + str(input_matrix))
         print("\nNeuron Weights: \n" + str(weight_matrix.transpose()))
-        print("\nNeuron Output: "+ str(np.tensordot(input_matrix, weight_matrix.transpose())))'''
-        return self.activate(np.tensordot(input_matrix, weight_matrix.transpose()))
+        print(str(type(weight_matrix)) + " " + str(type(input_matrix)))
+        # print("\nNeuron Output: "+ str(np.tensordot(input_matrix, weight_matrix.transpose())))
+        print("Weights Shape: " + str(weight_matrix.shape))'''
+        # print("Inputs Shape: " + str(np.tensordot(input_matrix.transpose(), weight_matrix)))
+        # print(self.activate(18.11266312555108))
+
+        return self.activate(np.tensordot(input_matrix.transpose(), weight_matrix))
 
 

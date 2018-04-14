@@ -18,18 +18,18 @@ neuron = NeurLibPerso.Perceptron(np)'''
 if len(sys.argv) < 0:
     sys.exit("Error, missing argument")
 
-#handler = MNIST_Handler.MNIST(True, sys.argv[1])
+handler = MNIST_Handler.MNIST(True, sys.argv[1], 50)
 # handler.print_image(handler.images[0])
-
+handler.print_image(50)
 # print(str(image_byte))
 np.random.seed(13)
 
-layers = 5, 5, 5, 5, 5, 5, 5, 5, 5
+layers = 784, 1000, 300, 10
 
 nn = NeurLibPerso.NeuralNetwork(layers, 0)
 
 #image_id, image = handler.get_image(28)
 
-nn.compute()
+nn.compute(handler.get_image(50))
 # print("\n\nOutput from first layer:")
 # print(DataFrame(nn.compute(nn.input_values, nn.weights_ih)))'''
