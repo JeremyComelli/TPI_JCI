@@ -1,39 +1,41 @@
 import sys
+import configparser
 import struct
 import os
 
 
 class MNIST:
-    def __init__(self, training, path, limit=0):
+    def __init__(self, config):
 
-        if limit is not 0:
-            self.limit = limit
-            print("Counter exists")
+        self.config = config['MNIST']
+        if int(self.config['limit']) is not 0:
+            self.limit = int(self.config['limit'])
             self.counter = 0
         else:
             self.counter = -1
 
-        self.training = training
-        if self.training:
-            self.labels_path = path + "\\training\\labels.idx1-ubyte"
-            self.data_path = path + "\\training\\data.idx3-ubyte"
+        if config['GLOBAL']['training']:
+            self.labels_path = self.config['path'] + "\\training\\labels.idx1-ubyte"
+            self.data_path = self.config['path'] + "\\training\\data.idx3-ubyte"
         else:
-            self.labels_path = path + "\\test\\labels.idx1-ubyte"
-            self.data_path = path + "\\test\\data.idx3-ubyte"
-
-        print("Data Path: " + self.labels_path)
-        print("Labels Path: " + self.data_path + "\n\n")
+            self.labels_path = self.config['path'] + "\\test\\labels.idx1-ubyte"
+            self.data_path = self.config['path'] + "\\test\\data.idx3-ubyte"
+        if self.config['verbose'] and int(self.config['log_level']) < 0:
+            print("Data Path: " + self.labels_path)
+            print("Labels Path: " + self.data_path + "\n\n")
 
         self.data = list()
         self.read_file()
 
-        '''image_id, image = self.get_image(12)
-        print("Image Value: " + str(image_id))
-        self.print_image(image)'''
+        if self.config['verbose'] and int(self.config['log_level']) > 0:
+            print("Files parsed successfully")
 
     def read_file(self):
         # TODO: récupérer le nombre d'images dans les 16 premiers bytes, et mettre une limite
-        print("Processing files, please wait...")
+        if self.config['verbose'] and int(self.config['log_level']) > 0:
+            print("\nParsing files, please wait...")
+            if int(self.config['log_level']) > 1:
+                print("Limit: " + str(self.limit))
         # Opening files
         if os.path.isfile(self.data_path) and os.path.isfile(self.labels_path):
             data_file = open(self.data_path, "rb")

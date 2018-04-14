@@ -6,7 +6,9 @@ import math
 # pandas is mainly used to pretty-print matrices
 class NeuralNetwork:
     # stuff of dreams
-    def __init__(self, nb_layers, activation_function=0):
+    def __init__(self, config, nb_layers=0, activation_function=0):
+
+        self.config = config['NEURALNET']
 
         # Setting the print precision to 3, to get simpler readings
         np.set_printoptions(precision=7)
@@ -14,19 +16,30 @@ class NeuralNetwork:
         #  Suppresses scientific notation for small values, improves readability
         # np.set_printoptions(suppress=True)
 
-        self.layers = nb_layers
+        if nb_layers > 0:
+            self.layers = nb_layers
+        else:
+            self.layers = config['structure']
+
 
         # Current step is used by recursive layer computation function to know which layer is currently processed
         self.current_step = 0
 
         # Generating weights for the different layers
-        self.weights = self.generate_weights(nb_layers)
+        self.weights = self.generate_weights(self.layers)
+
+        if self.config['verbose'] and int(self.config['log_level']) > 1:
+            print(DataFrame(self.weights))
 
         # TODO: generate_biases()
 
-        self.activation_function = activation_function
+        if activation_function > 0:
+            self.activation_function = activation_function
+        else:
+            self.activation_function = self.config['activation_function']
 
-        print("\nNeural network Initialized Successfully\n")
+        if self.config['verbose'] and int(self.config['log_level']) > 0:
+            print("\nNeural network Initialized Successfully\n")
 
     # Generates random weights between 2 layers. Every value is between -1 and 1
     @staticmethod
@@ -35,12 +48,9 @@ class NeuralNetwork:
         i = 0
         for current_layer in nb_layers:
             if i < len(nb_layers) - 1:
-                print(str(current_layer) + " | " + str(nb_layers[i + 1]))
-                weights.append(np.matrix(np.random.rand(nb_layers[i + 1], current_layer)))
+                weights.append(np.matrix(np.random.rand(nb_layers[i + 1], current_layer)/1000))
             i += 1
         return weights
-
-
 
     # Generates random biases for each neuron (except input and output)
     @staticmethod
@@ -68,29 +78,33 @@ class NeuralNetwork:
             return x*(1-x)
         return 1/(1+np.exp(-x))
 
-    def compute(self, input_vector=0):
+    def compute_image(self, input_vector=0):
+
         # if no input is specified, we use dummy values for testing
         if input_vector is 0:
-            print("\nNo input values specified, using dummy-random values")
+            if self.config['verbose'] and int(self.config['log_level']) > 0:
+                print("\nNo input values specified, using dummy-random values")
+
             input_vector = np.matrix(np.random.rand(self.layers[self.current_step], 1))
             input_answer = np.random.randint(0, 10)
 
             # Recursive magic happening here
-            self.compute_layer(input_vector)
+            output = self.compute_layer(input_vector)
         else:
             input_answer, raw_input_image = input_vector
             input_image = np.matrix(raw_input_image)
-            self.compute_layer(input_image.transpose())
+            output = self.compute_layer(input_image.transpose())
 
-        print(input_answer)
-        return 0
+        return  input_answer, output
 
     # Recursive function that computes a layer, then calls itself with
     def compute_layer(self, input_vector):
         if self.current_step + 1 is not len(self.layers):
-            print("\n\n\nInput from layer " + str(self.current_step) + " to layer " + str(self.current_step + 1) + ":")
+            if self.config['verbose'] and int(self.config['log_level']) > 0:
+                print("\n\n\nInput from layer " + str(self.current_step) + " to layer " + str(self.current_step + 1) + ":")
         else:
-            print("\n\n\nOutput (Layer " + str(self.current_step) + "): ")
+            if self.config['verbose'] and int(self.config['log_level']) > 0:
+                print("\n\n\nOutput (Layer " + str(self.current_step) + "): ")
 
         print(DataFrame(input_vector))
 
@@ -100,23 +114,36 @@ class NeuralNetwork:
             #
             layer_output = np.dot(self.weights[self.current_step], input_vector)
             self.current_step += 1
-            self.compute_layer(self.activate(layer_output))
+            return self.compute_layer(self.activate(layer_output))
 
-        return 0
+        return input_vector
 
-    # Here we compute a weighted sum
-    def compute_neuron(self, input_matrix, weight_matrix, bias=0):
-        weight_matrix = weight_matrix.transpose()
-        print(str(input_matrix.shape))
-        print(str(weight_matrix.shape))
-        # Prints used to troubleshoot neurons, remove for release
-        '''print("\nNeuron input: \n" + str(input_matrix))
-        print("\nNeuron Weights: \n" + str(weight_matrix.transpose()))
-        print(str(type(weight_matrix)) + " " + str(type(input_matrix)))
-        # print("\nNeuron Output: "+ str(np.tensordot(input_matrix, weight_matrix.transpose())))
-        print("Weights Shape: " + str(weight_matrix.shape))'''
-        # print("Inputs Shape: " + str(np.tensordot(input_matrix.transpose(), weight_matrix)))
-        print(np.dot(input_matrix, weight_matrix))
-        return self.activate(np.dot(input_matrix.transpose(), weight_matrix))
+    # Calculates the network's error.
+    # TODO: right now, the output layer is 10 neurons, improve scalability
+    def get_error(self, value, network_output):
+        target = self.get_target_output(value)
+        error = np.zeros(shape=(10, 1))
+        if error.shape == network_output.shape:
+            for i in range(0, 10):
+                error[i, 0] = target[i, 0] - network_output[i, 0]
+        else:
+            print("Error shape:" + str(error.shape))
+            print("Network output shape:" + str(network_output.shape))
+            sys.exit("Error: Can't compute error because network output doesn't match standard output")
+
+        return error
+
+    # Simple function to get the wanted output as a matrix. Used to calculate error
+    @staticmethod
+    def get_target_output(value):
+        if value > 9:
+            sys.exit("Cannot get target output: Value is greater than 9")
+
+        return_value = np.zeros(shape=(10, 1))
+        for i in range(0, 10):
+            if i is value:
+                return_value[i, 0] += 1
+
+        return return_value
 
 
