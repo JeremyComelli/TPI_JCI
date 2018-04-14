@@ -6,7 +6,7 @@ import math
 # pandas is mainly used to pretty-print matrices
 class NeuralNetwork:
     # stuff of dreams
-    def __init__(self, nb_layers, activation_function):
+    def __init__(self, nb_layers, activation_function=0):
 
         # Setting the print precision to 3, to get simpler readings
         np.set_printoptions(precision=7)
@@ -33,12 +33,14 @@ class NeuralNetwork:
     def generate_weights(nb_layers):
         weights = list()
         i = 0
-        np.random.seed(10)
-        for layer in nb_layers:
+        for current_layer in nb_layers:
             if i < len(nb_layers) - 1:
-                weights.append(np.matrix(np.random.rand(nb_layers[i+1], layer)))
+                print(str(current_layer) + " | " + str(nb_layers[i + 1]))
+                weights.append(np.matrix(np.random.rand(nb_layers[i + 1], current_layer)))
             i += 1
         return weights
+
+
 
     # Generates random biases for each neuron (except input and output)
     @staticmethod
@@ -64,41 +66,47 @@ class NeuralNetwork:
     def sigmoid(x, deriv=False):
         if deriv:
             return x*(1-x)
-        return round(1/(1+np.exp(-x)), 3)
+        return 1/(1+np.exp(-x))
 
     def compute(self, input_vector=0):
         # if no input is specified, we use dummy values for testing
         if input_vector is 0:
             print("\nNo input values specified, using dummy-random values")
-            input_vector = np.matrix(np.random.rand(self.layers[self.current_step], 1)*10)
+            input_vector = np.matrix(np.random.rand(self.layers[self.current_step], 1))
+            input_answer = np.random.randint(0, 10)
 
             # Recursive magic happening here
             self.compute_layer(input_vector)
         else:
-            input_id, raw_input_image = input_vector
+            input_answer, raw_input_image = input_vector
             input_image = np.matrix(raw_input_image)
-            self.compute_layer(input_image)
+            self.compute_layer(input_image.transpose())
+
+        print(input_answer)
         return 0
 
     # Recursive function that computes a layer, then calls itself with
     def compute_layer(self, input_vector):
-        print("\n\nInput from layer " + str(self.current_step) + " to layer " + str(self.current_step + 1) + ":")
-        print(input_vector)
+        if self.current_step + 1 is not len(self.layers):
+            print("\n\n\nInput from layer " + str(self.current_step) + " to layer " + str(self.current_step + 1) + ":")
+        else:
+            print("\n\n\nOutput (Layer " + str(self.current_step) + "): ")
 
-        layer_output = list()
+        print(DataFrame(input_vector))
 
+        # print(DataFrame(self.weights[self.current_step]))
         # Recursion happens here, if there is another layer, we need to go deeper
         if self.current_step < len(self.layers) - 1:
-            for neuron in range(0, self.layers[self.current_step + 1]):
-                layer_output.append(self.compute_neuron(input_vector, self.weights[self.current_step][:, neuron].transpose()))
-
+            #
+            layer_output = np.dot(self.weights[self.current_step], input_vector)
             self.current_step += 1
-            self.compute_layer(np.matrix(layer_output).transpose())
+            self.compute_layer(self.activate(layer_output))
 
         return 0
 
     # Here we compute a weighted sum
     def compute_neuron(self, input_matrix, weight_matrix, bias=0):
+        weight_matrix = weight_matrix.transpose()
         print(str(input_matrix.shape))
         print(str(weight_matrix.shape))
         # Prints used to troubleshoot neurons, remove for release
@@ -108,8 +116,7 @@ class NeuralNetwork:
         # print("\nNeuron Output: "+ str(np.tensordot(input_matrix, weight_matrix.transpose())))
         print("Weights Shape: " + str(weight_matrix.shape))'''
         # print("Inputs Shape: " + str(np.tensordot(input_matrix.transpose(), weight_matrix)))
-        # print(self.activate(18.11266312555108))
-
-        return self.activate(np.tensordot(input_matrix.transpose(), weight_matrix))
+        print(np.dot(input_matrix, weight_matrix))
+        return self.activate(np.dot(input_matrix.transpose(), weight_matrix))
 
 
